@@ -12,6 +12,7 @@ def main(page: ft.Page):
     pm = ProcessesManagerDC(path)
     pm.deserialization()
     main_process_name = pm.first_process_name
+    mode = 0
 
     page.title = "Flet Debt Counter"
     page.window.width = 550
@@ -59,14 +60,14 @@ def main(page: ft.Page):
                         pm.add_new_process(rez)
                     pm.controller()
                     pm.previous_action_result = 'Success!'
-                    new_screen(name)(None)
+                    new_screen(name, mode)(None)
                 except Exception as e:
                     pm.previous_action_result = str(e)
-                    new_screen(name)(None)
+                    new_screen(name, mode)(None)
 
         return fun
 
-    def new_screen(name):
+    def new_screen(name, sorting_mode):
         def fun(e):
             page.clean()
             pm.positions.clear()
@@ -80,13 +81,23 @@ def main(page: ft.Page):
             else:
                 main_start = pm.main_dict[name].get_first_date()
                 main_finish = pm.main_dict[name].get_last_date()
+            page.controls.append(ft.Row([ft.TextButton(text='begin', on_click=new_screen(name, 0)),
+                                         ft.TextButton(text='last_transaction', on_click=new_screen(name, 1)),
+                                         ft.TextButton(text='reminder', on_click=new_screen(name, 2))],
+                                        alignment=ft.MainAxisAlignment.CENTER))
             page.controls.append(process_tree)
             rows = [row(name, main_start, main_finish, pm.info_dict[name][1])]
             items = []
-            for process in reversed(pm.main_dict[name].related_processes):
+            if sorting_mode == 0:
+                process_list = reversed(pm.main_dict[name].related_processes)
+            elif sorting_mode == 1:
+                process_list = sorted(pm.main_dict[name].related_processes, key=lambda p: -p.get_last_date())
+            else:
+                process_list = reversed(pm.main_dict[name].related_processes)
+            for process in process_list:
                 text1 = pm.info_dict[process.get_process_name()][0]
                 text2 = pm.info_dict[process.get_process_name()][1]
-                items.append(ft.TextButton(text1, on_click=new_screen(process.get_process_name())))
+                items.append(ft.TextButton(text1, on_click=new_screen(process.get_process_name(), sorting_mode)))
                 rows.append(row(process.get_process_name(), main_start, main_finish, text2, name))
             page.controls.append(ft.Row([ft.Column(items)], alignment=ft.MainAxisAlignment.CENTER))
             page.controls.append(ft.Text(value=pm.previous_action_result))
@@ -95,11 +106,11 @@ def main(page: ft.Page):
             page.controls.append(ft.Row([ft.TextButton(text=i, on_click=transaction(name, True, i)) for i in pm.main_dict[name].get_able_list()], alignment=ft.MainAxisAlignment.CENTER))
             page.controls.append(ft.Row([ft.Text(value=pm.get_transactionDC(name), text_align=ft.TextAlign.CENTER)], alignment=ft.MainAxisAlignment.CENTER))
             page.controls.append(ft.Row([ft.TextButton(text='Close the program', on_click=exit_from_app())], alignment=ft.MainAxisAlignment.CENTER))
-            page.controls.__getitem__(0).value = '\n'.join(rows)
+            page.controls.__getitem__(1).value = '\n'.join(rows)
             page.update()
         return fun
 
-    new_screen(main_process_name)(None)
+    new_screen(main_process_name, mode)(None)
 
 
 ft.app(main)

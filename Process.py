@@ -45,7 +45,7 @@ class Process:
     def split(self, _, date: float, init: bool):
         self.add_transaction(Transaction(date, f'SPLIT {date} from {self._me}', True), init)
         process = Process((date, self._me))
-        process.add_transaction(Transaction(date, f'INFO New: {date} from {self._me}', True), init)
+        process.add_transaction(Transaction(date, f'INFO New {date} from {self._me}', True), init)
         self.related_processes.append(process)
         process.related_processes.append(self)
         return process
@@ -84,6 +84,9 @@ class Process:
     def get_ables(self):
         return ', '.join(self._able.keys())
 
+    def get_able_list(self):
+        return self._able.keys()
+
     def get_not_official_transaction(self):
         not_official = [i for i in self.__data if not i.official]
         return f'\n' + '\n\n'.join(map(lambda x: str(x), reversed(not_official)))
@@ -101,5 +104,5 @@ class Process:
             date = datetime.datetime.now(datetime.timezone.utc).timestamp()
             init = False
         process = Process((date, 0))
-        process.add_transaction(Transaction(date, f'INFO New: {date} from {0}', True), init)
+        process.add_transaction(Transaction(date, f'INFO New {date} from {0}', True), init)
         return process

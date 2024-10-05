@@ -18,31 +18,23 @@ class ProcessesManagerDC(ProcessesManager):
         total_amount = 0
         for process in self.main_dict.values():
             if isinstance(process, MyLife):
-                self.info_dict[process.get_process_name()] = ['CROSS, '
-                                                              + ', '.join(process.additional_ables.keys())]
-                self.info_dict[process.get_process_name()].append(process.name)
+                self.info_dict[process.get_process_name()] = [process.name]
             elif isinstance(process, Person):
-                self.info_dict[process.get_process_name()] = ['CROSS, '
-                                                              + ', '.join(process.additional_ables.keys())]
-                self.info_dict[process.get_process_name()].append(process.name)
+                self.info_dict[process.get_process_name()] = [process.name]
                 amount = sum(map(lambda x: x.debt_amount, process.debts))
                 total_amount += amount
                 self.info_dict[process.get_process_name()].append(process.name
                                                                   + ' balance: ' + str(amount))
             elif isinstance(process, Debt):
-                self.info_dict[process.get_process_name()] = ['CROSS, '
-                                                              + ', '.join(process.additional_ables.keys())]
-                self.info_dict[process.get_process_name()].append('Debt of '
-                                                                  + process.related_processes[0].name)
+                self.info_dict[process.get_process_name()] = ['Debt of ' + process.related_processes[0].name]
                 self.info_dict[process.get_process_name()].append('Debt of '
                                                                   + process.related_processes[0].name + ": "
                                                                   + str(process.debt_amount) + ' '
                                                                   + str(process.debt_currency))
             else:
-                self.info_dict[process.get_process_name()] = ['CROSS, SPLIT']
-                self.info_dict[process.get_process_name()].append(process.get_process_name())
+                self.info_dict[process.get_process_name()] = [process.get_process_name()]
                 self.info_dict[process.get_process_name()].append(process.get_process_name()
-                                                                  + " from " + process.related_processes[0].name)
+                                                                  + " from " + process.related_processes[0].get_process_name())
         self.info_dict[self.first_process_name].append(self.first_process.name
                                                        + ' balance: ' + str(total_amount))
 
@@ -63,27 +55,27 @@ class ProcessesManagerDC(ProcessesManager):
                     if tag2 == 'New':
                         message = f'{date_text}\nThe process was created'
                     elif tag2 == 'CROSS':
-                        name = float(transaction.text.split()[2])
-                        name = str(int(name * 10 ** 6))
-                        message = f'{date_text}\nThe process was crossed with {self.info_dict[name][1]}'
+                        name_float = float(transaction.text.split()[2])
+                        name = str(int(name_float * 10 ** 6))
+                        message = f'{date_text}\nThe process was crossed with {self.info_dict[name][0]}'
                     else:
                         message = f'{date_text}\nSome another information'
                 elif tag == 'SPLIT':
-                        name = float(transaction.text.split()[1])
-                        name = str(int(name * 10 ** 6))
+                        name_float = float(transaction.text.split()[1])
+                        name = str(int(name_float * 10 ** 6))
                         message = f'{date_text}\nThe process, {name}, was created'
                 elif tag == 'CROSS':
-                    name = float(transaction.text.split()[1])
-                    name = str(int(name * 10 ** 6))
-                    message = f'{date_text}\nThe process was crossed with {self.info_dict[name][1]}'
+                    name_float = float(transaction.text.split()[1])
+                    name = str(int(name_float * 10 ** 6))
+                    message = f'{date_text}\nThe process was crossed with {self.info_dict[name][0]}'
                 elif tag == 'NEW_PERSON':
-                    name = float(transaction.text.split()[1])
-                    name = str(int(name * 10 ** 6))
-                    message = f'{date_text}\nNew person, {self.info_dict[name][1]}, was created'
+                    name_float = float(transaction.text.split()[1])
+                    name = str(int(name_float * 10 ** 6))
+                    message = f'{date_text}\nNew person, {self.info_dict[name][0]}, was created'
                 elif tag == 'NEW_DEBT':
                     message = f'{date_text}\nNew debt was created'
                 elif tag == 'CHANGE_NAME':
-                    message = f'{date_text}\nThe name was changed'
+                    message = f'{date_text}\nThe name was changed from {transaction.text.split()[3]}'
                 elif tag == 'CHANGE_BIRTHDAY':
                     message = f'{date_text}\nThe birth day was changed'
                 elif tag == 'CHANGE_CURRENCY':

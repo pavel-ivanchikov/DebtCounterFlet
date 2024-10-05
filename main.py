@@ -9,7 +9,7 @@ def main(page: ft.Page):
     main_process_name = pm.first_process_name
 
     page.title = "Flet Debt Counter"
-    page.window.width = 500
+    page.window.width = 550
     page.scroll = True
     process_tree = ft.Text()
 
@@ -38,12 +38,12 @@ def main(page: ft.Page):
             page.window.destroy()
         return fun
 
-    def transaction(name, official):
+    def transaction(name, official, btn_name):
         def fun(e):
-            input_text = page.controls.__getitem__(-6).value
-            if input_text:
+            input_text = page.controls.__getitem__(-5).value
+            if input_text or official:
                 try:
-                    rez = pm.main_dict[name].act(input_text, official=official)
+                    rez = pm.main_dict[name].act((btn_name + ' ') * int(official) + input_text, official=official)
                     if rez:
                         pm.add_new_process(rez)
                     pm.controller()
@@ -66,52 +66,25 @@ def main(page: ft.Page):
                               max(pm.main_dict[name].related_processes,
                                   key=lambda x: x.get_last_date()).get_last_date())
             page.controls.append(process_tree)
-            rows = [row(name, main_start, main_finish, pm.info_dict[name][2])]
+            rows = [row(name, main_start, main_finish, pm.info_dict[name][1])]
+            items = []
             for process in reversed(pm.main_dict[name].related_processes):
-                text1 = pm.info_dict[process.get_process_name()][1]
-                text2 = pm.info_dict[process.get_process_name()][2]
-                page.controls.append(ft.TextButton(text1,
-                                                   on_click=new_screen(process.get_process_name())))
+                text1 = pm.info_dict[process.get_process_name()][0]
+                text2 = pm.info_dict[process.get_process_name()][1]
+                items.append(ft.TextButton(text1, on_click=new_screen(process.get_process_name())))
                 rows.append(row(process.get_process_name(), main_start, main_finish, text2, name))
+            page.controls.append(ft.Row([ft.Column(items)], alignment=ft.MainAxisAlignment.CENTER))
             page.controls.append(ft.Text(value=pm.previous_action_result))
             page.controls.append(ft.TextField())
-            page.controls.append(ft.TextButton(text='Add Message', on_click=transaction(name, False)))
-            page.controls.append(ft.Text(value=pm.info_dict[name][0]))
-            page.controls.append(ft.TextButton(text='Official', on_click=transaction(name, True)))
-            page.controls.append(ft.Text(value=pm.get_transactionDC(name), text_align=ft.TextAlign.CENTER))
-            page.controls.append(ft.TextButton(text='Close the program', on_click=exit_from_app()))
+            page.controls.append(ft.Row([ft.TextButton(text='Add Message', on_click=transaction(name, False, ''))], alignment=ft.MainAxisAlignment.CENTER))
+            page.controls.append(ft.Row([ft.TextButton(text=i, on_click=transaction(name, True, i)) for i in pm.main_dict[name].get_able_list()], alignment=ft.MainAxisAlignment.CENTER))
+            page.controls.append(ft.Row([ft.Text(value=pm.get_transactionDC(name), text_align=ft.TextAlign.CENTER)], alignment=ft.MainAxisAlignment.CENTER))
+            page.controls.append(ft.Row([ft.TextButton(text='Close the program', on_click=exit_from_app())], alignment=ft.MainAxisAlignment.CENTER))
             page.controls.__getitem__(0).value = '\n'.join(rows)
             page.update()
         return fun
 
     new_screen(main_process_name)(None)
-
-    # page.add(
-    #     ft.Row(
-    #         [process_tree],
-    #         alignment=ft.MainAxisAlignment.CENTER,
-    #     ),
-    #     ft.Row(
-    #         [
-    #            ft.TextButton(i.get_process_name(), on_click=act(i.get_process_name())) for i in pm.main_dict[main_process_name].related_processes
-    #
-    #         ],
-    #         alignment=ft.MainAxisAlignment.CENTER,
-    #     ),
-    #
-    #     ft.Row(
-    #         [
-    #             ft.IconButton(ft.icons.REMOVE, on_click=minus_click),
-    #             txt_number,
-    #             ft.IconButton(ft.icons.ADD, on_click=plus_click),
-    #         ],
-    #         alignment=ft.MainAxisAlignment.CENTER,
-    #     ),
-    #     ft.Row(
-    #         [text],
-    #         alignment=ft.MainAxisAlignment.CENTER,
-    #     )
-    # )
 
 
 ft.app(main)

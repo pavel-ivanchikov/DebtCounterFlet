@@ -15,6 +15,8 @@ class Debt(Process):
 
     def change_currency(self, text, date: float, init: bool):
         currency = text.split(' ')[1]
+        if not currency:
+            raise ValueError('Value should be not empty')
         if currency not in Debt._currency_list:
             raise ValueError('Value should be positive integer number')
         elif self.debt_amount != 0:
@@ -43,3 +45,9 @@ class Debt(Process):
             raise ValueError('Value should be positive integer number')
         self.add_transaction(Transaction(date, f'TAKE {amount} from debt {self.debt_amount}', True), init)
         self.debt_amount -= amount
+
+    def get_able_list(self):
+        ans = self._able.copy()
+        del ans['INFO']
+        del ans['SPLIT']
+        return ans.keys()

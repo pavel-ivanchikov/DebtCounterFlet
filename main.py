@@ -15,12 +15,12 @@ def main(page: ft.Page):
     mode = 0
 
     page.title = "Flet Debt Counter"
-    page.window.width = 550
+    page.window.width = 600
     page.scroll = True
     process_tree = ft.Text()
 
     def row(name, main_start, main_finish, text, main_name=None):
-        n = 70
+        n = 90
         ans = ['-' for _ in range(n + 2)]
         one = (main_finish - main_start) / n
         start = pm.main_dict[name].get_identifier()[0]

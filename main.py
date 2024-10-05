@@ -1,9 +1,14 @@
+import os
 import flet as ft
+from MyLife import MyLife
 from ProcessesManagerDC import ProcessesManagerDC
 
 
 def main(page: ft.Page):
-    path = r"C:/DebtCounter/third/"
+    path = r"C:/DebtCounter/fifth/"
+    # Process._path = path
+    if len(os.listdir(path)) == 0:
+        _ = MyLife.create_first_process()
     pm = ProcessesManagerDC(path)
     pm.deserialization()
     main_process_name = pm.first_process_name
@@ -21,9 +26,11 @@ def main(page: ft.Page):
         if start > main_start:
             for i in range(round((start - main_start) / one)):
                 ans[i] = '_'
-        for transaction in pm.main_dict[name].get_data():
-            if transaction.official:
-                time_crossing = transaction.date
+        for action in pm.main_dict[name].get_data():
+            if action.official:
+                time_crossing = action.date
+                if one == 0:
+                    one = 1
                 position = round((time_crossing - main_start) / one)
                 if main_name is None:
                     pm.positions.append(position)
@@ -40,7 +47,11 @@ def main(page: ft.Page):
 
     def transaction(name, official, btn_name):
         def fun(e):
-            input_text = page.controls.__getitem__(-5).value
+            item = page.controls.__getitem__(-5)
+            if isinstance(item, ft.TextField):
+                input_text = item.value
+            else:
+                raise ValueError("Пытаюсь достать текст из нетекстового поля")
             if input_text or official:
                 try:
                     rez = pm.main_dict[name].act((btn_name + ' ') * int(official) + input_text, official=official)
@@ -59,12 +70,16 @@ def main(page: ft.Page):
         def fun(e):
             page.clean()
             pm.positions.clear()
-            main_start = min(pm.main_dict[name].get_first_date(),
-                             min(pm.main_dict[name].related_processes,
-                                 key=lambda x: x.get_first_date()).get_first_date())
-            main_finish = max(pm.main_dict[name].get_last_date(),
-                              max(pm.main_dict[name].related_processes,
-                                  key=lambda x: x.get_last_date()).get_last_date())
+            if pm.main_dict[name].related_processes:
+                main_start = min(pm.main_dict[name].get_first_date(),
+                                 min(pm.main_dict[name].related_processes,
+                                     key=lambda x: x.get_first_date()).get_first_date())
+                main_finish = max(pm.main_dict[name].get_last_date(),
+                                  max(pm.main_dict[name].related_processes,
+                                      key=lambda x: x.get_last_date()).get_last_date())
+            else:
+                main_start = pm.main_dict[name].get_first_date()
+                main_finish = pm.main_dict[name].get_last_date()
             page.controls.append(process_tree)
             rows = [row(name, main_start, main_finish, pm.info_dict[name][1])]
             items = []

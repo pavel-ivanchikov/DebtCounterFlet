@@ -38,7 +38,7 @@ class ProcessesManagerDC(ProcessesManager):
         self.info_dict[self.first_process_name].append(self.first_process.name
                                                        + ' balance: ' + str(total_amount))
 
-    def get_transactionDC(self, name, n=None):
+    def get_transaction(self, name, n=None):
         process = self.main_dict[name]
         ans = []
         if n is None:
@@ -94,6 +94,13 @@ class ProcessesManagerDC(ProcessesManager):
             else:
                 ans.append(str(transaction))
         return f'\n' + '\n\n'.join(ans)
+
+    def get_reminder(self, name):
+        process = self.main_dict[name]
+        if str(process.get_reminder_date_time()) == "9999-12-31 00:00:00":
+            return '\n' + process.get_reminder_text()
+        else:
+            return '\n' + str(process.get_reminder_date_time()) + '\n' + process.get_reminder_text()
 
     def get_main_process(self):
         return MyLife.create_first_process(int(self.first_process_name) / 10 ** 6)

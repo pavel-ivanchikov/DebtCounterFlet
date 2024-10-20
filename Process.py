@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from Transaction import Transaction
 
 
@@ -10,8 +10,9 @@ class Process:
         self.__data = []
         self._me = identifier[0]
         self._parent = identifier[1]
-        self._able = {'INFO': self.info, 'SPLIT': self.split, 'CROSS': self.cross}
-        self._reminder = None
+        self._able = {'SET_REMINDER': self.set_reminder, 'INFO': self.info, 'SPLIT': self.split, 'CROSS': self.cross}
+        self._reminder_date_time = datetime(9999, 12, 31)
+        self._reminder_text = 'No have reminder'
         self.related_processes = []
         Process._all_processes[self.get_process_name()] = self
 
@@ -29,7 +30,7 @@ class Process:
             init = True
         else:
             init = False
-            date = datetime.datetime.now(datetime.timezone.utc).timestamp()
+            date = datetime.now().timestamp()
         if official:
             tag = text.split(' ')[0]
             if tag in self._able:
@@ -59,6 +60,15 @@ class Process:
             self.related_processes.append(process)
             process.related_processes.append(self)
 
+    def set_reminder(self, text, date: float, init: bool):
+        reminder_datetime = datetime.strptime(text.split(' ')[1], '%d.%m.%Y-%H:%M:%S')
+        reminder_text = ' '.join(text.split(' ')[2:])
+        if not reminder_datetime or not reminder_text:
+            raise ValueError('Value should be not empty')
+        self.add_transaction(Transaction(date, f'SET_REMINDER {reminder_datetime.strftime("%d.%m.%Y-%H:%M:%S")} {reminder_text}', True), init)
+        self._reminder_date_time = reminder_datetime
+        self._reminder_text = reminder_text
+
     @staticmethod
     def get_process(identifier: float):
         if str(int(identifier * 10 ** 6)) in Process._all_processes:
@@ -71,6 +81,12 @@ class Process:
 
     def get_process_name(self):
         return str(int(self._me * 10 ** 6))
+
+    def get_reminder_date_time(self):
+        return self._reminder_date_time
+
+    def get_reminder_text(self):
+        return self._reminder_text
 
     def get_last_date(self):
         return self.__data[-1].date
@@ -101,7 +117,7 @@ class Process:
     def create_first_process(cls, date=None):
         init = True
         if date is None:
-            date = datetime.datetime.now(datetime.timezone.utc).timestamp()
+            date = datetime.now().timestamp()
             init = False
         process = Process((date, 0))
         process.add_transaction(Transaction(date, f'INFO New {date} from {0}', True), init)

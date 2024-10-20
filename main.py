@@ -15,12 +15,12 @@ def main(page: ft.Page):
     mode = 0
 
     page.title = "Flet Debt Counter"
-    page.window.width = 600
+    page.window.width = 700
     page.scroll = True
     process_tree = ft.Text()
 
     def row(name, main_start, main_finish, text, main_name=None):
-        n = 90
+        n = 100
         ans = ['-' for _ in range(n + 2)]
         one = (main_finish - main_start) / n
         start = pm.main_dict[name].get_identifier()[0]
@@ -48,7 +48,7 @@ def main(page: ft.Page):
 
     def transaction(name, official, btn_name):
         def fun(e):
-            item = page.controls.__getitem__(-5)
+            item = page.controls.__getitem__(-6)
             if isinstance(item, ft.TextField):
                 input_text = item.value
             else:
@@ -93,7 +93,7 @@ def main(page: ft.Page):
             elif sorting_mode == 1:
                 process_list = sorted(pm.main_dict[name].related_processes, key=lambda p: -p.get_last_date())
             else:
-                process_list = reversed(pm.main_dict[name].related_processes)
+                process_list = sorted(pm.main_dict[name].related_processes, key=lambda p: p.get_reminder_date_time())
             for process in process_list:
                 text1 = pm.info_dict[process.get_process_name()][0]
                 text2 = pm.info_dict[process.get_process_name()][1]
@@ -104,7 +104,8 @@ def main(page: ft.Page):
             page.controls.append(ft.TextField())
             page.controls.append(ft.Row([ft.TextButton(text='Add Message', on_click=transaction(name, False, ''))], alignment=ft.MainAxisAlignment.CENTER))
             page.controls.append(ft.Row([ft.TextButton(text=i, on_click=transaction(name, True, i)) for i in pm.main_dict[name].get_able_list()], alignment=ft.MainAxisAlignment.CENTER))
-            page.controls.append(ft.Row([ft.Text(value=pm.get_transactionDC(name), text_align=ft.TextAlign.CENTER)], alignment=ft.MainAxisAlignment.CENTER))
+            page.controls.append(ft.Text(value=pm.get_reminder(name)))
+            page.controls.append(ft.Row([ft.Text(value=pm.get_transaction(name), text_align=ft.TextAlign.CENTER)], alignment=ft.MainAxisAlignment.CENTER))
             page.controls.append(ft.Row([ft.TextButton(text='Close the program', on_click=exit_from_app())], alignment=ft.MainAxisAlignment.CENTER))
             page.controls.__getitem__(1).value = '\n'.join(rows)
             page.update()

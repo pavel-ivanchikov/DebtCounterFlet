@@ -12,31 +12,53 @@ def main(page: ft.Page):
     pm = ProcessesManagerDC(path)
     pm.deserialization()
     main_process_name = pm.first_process_name
+    page.process_name = pm.first_process_name
     mode = 0
 
     page.title = "Flet Debt Counter"
-    page.window_width = 700
+    page.window.width = 777
     page.scroll = True
     process_tree = ft.Text()
 
-    def handle_change(name):
+    def handle_change_date():
         def fun(e):
-            # Обновляем дату и время
             page.date = date_picker.value
-            page.time = time_picker.value
 
-            if page.date and page.time:
-                # Объединяем дату и время в одну строку
-                selected_datetime = f"{page.date.strftime('%d.%m.%Y')}-{page.time.strftime('%H:%M:%S')}"
+            if page.date:
                 page.date_text = page.date.strftime('%d.%m.%Y')
-                page.time_text = page.time.strftime('%H:%M:%S')
-                # Обновляем атрибут страницы
-                new_screen(name, mode)(None)
-                item = page.controls.__getitem__(-5)  # Получаем текстовое поле
-                item.value = selected_datetime  # Обновляем текстовое поле
-                page.update()
+                new_screen(page.process_name, mode)(None)
+                handle_date_time_changes()
 
         return fun
+
+    def handle_change_time():
+        def fun(e):
+            page.time = time_picker.value
+
+            if page.time:
+                page.time_text = page.time.strftime('%H:%M:%S')
+                new_screen(page.process_name, mode)(None)
+                handle_date_time_changes()
+
+        return fun
+
+    def handle_date_time_changes():
+        if page.date and page.time:
+            # Объединяем дату и время в одну строку
+            selected_datetime = f"{page.date_text}-{page.time_text}"
+            # Обновляем атрибут страницы
+            new_screen(page.process_name, mode)(None)
+            item = page.controls.__getitem__(-5)  # Получаем текстовое поле
+            item.value = selected_datetime  # Обновляем текстовое поле
+            page.update()
+
+    def handle_process_choose(e):
+        # Получаем выбранное значение из выпадающего списка
+        selected_process = page.dropdown.value  # Используем page.dropdown
+        # Обновляем текстовое поле
+        page.text_field.value = str(float(selected_process.split()[0])/(10**6))  # Используем page.text_field
+        page.dropdown.label = "select process to intersect"
+        page.update()
 
     def handle_dismissal(e):
         pass
@@ -45,16 +67,25 @@ def main(page: ft.Page):
     date_picker = ft.DatePicker(
                             first_date=datetime.datetime.now(),
                             last_date=datetime.datetime.now() + datetime.timedelta(days=365),
-                            on_change=handle_change(main_process_name),
+                            on_change=handle_change_date(),
                             on_dismiss=handle_dismissal)
     time_picker = ft.TimePicker(
-                            on_change=handle_change(main_process_name),
+                            on_change=handle_change_time(),
                             on_dismiss=handle_dismissal)
     page.overlay.extend([date_picker, time_picker])  # Добавляем оба пикера в overlay
-    page.date_text = 'Выберите дату'
-    page.time_text = 'Выберите время'
+    page.date_text = 'select a date for reminder'
+    page.time_text = 'select a time for reminder'
     page.date = None
     page.time = None
+
+    # Создаем выпадающий список и текстовое поле
+    page.dropdown = ft.Dropdown(
+        options=[ft.dropdown.Option(f"{process_id} ({process_info[1]})") for process_id, process_info in
+                 pm.info_dict.items()],
+        label="select process to intersect",
+        on_change=handle_process_choose  # Привязываем обработчик события
+    )
+    page.text_field = ft.TextField()
 
     def row(name, main_start, main_finish, text, main_name=None):
         n = 100
@@ -108,8 +139,16 @@ def main(page: ft.Page):
 
     def new_screen(name, sorting_mode):
         def fun(e):
+            if page.process_name != name:
+                page.process_name = name
+                page.date_text = 'select a date for reminder'
+                page.time_text = 'select a time for reminder'
+                page.date = None
+                page.time = None
+
             page.clean()
             pm.positions.clear()
+
             if pm.main_dict[name].related_processes:
                 main_start = min(pm.main_dict[name].get_first_date(),
                                  min(pm.main_dict[name].related_processes,
@@ -143,22 +182,23 @@ def main(page: ft.Page):
             page.controls.append(
                 ft.ElevatedButton(
                     page.date_text,
-                    icon=ft.Icons.CALENDAR_MONTH,  # Используем ft.Icons вместо ft.icons
+                    icon=ft.icons.CALENDAR_MONTH,  # Используем ft.Icons вместо ft.icons
                     on_click=lambda e: page.open(date_picker),  # Открываем DatePicker через page.open
                 )
             )
             page.controls.append(
                 ft.ElevatedButton(
                     page.time_text,
-                    icon=ft.Icons.ACCESS_TIME,  # Используем ft.Icons вместо ft.icons
+                    icon=ft.icons.ACCESS_TIME,  # Используем ft.Icons вместо ft.icons
                     on_click=lambda e: page.open(time_picker),  # Открываем TimePicker через page.open
                 )
             )
-            page.controls.append(ft.Dropdown(options=[ft.dropdown.Option(f"{process_id} ({process_info[1]})") for process_id, process_info in pm.info_dict.items()], label="Выберите процесс",))
-            page.controls.append(ft.TextField())
+            # Добавляем выпадающий список и текстовое поле на страницу
+            page.controls.append(page.dropdown)
+            page.controls.append(page.text_field)
             page.controls.append(ft.Row([ft.TextButton(text='Add Message', on_click=transaction(name, False, ''))] +
                                         [ft.TextButton(text=i, on_click=transaction(name, True, i)) for i in pm.main_dict[name].get_able_list()], alignment=ft.MainAxisAlignment.CENTER))
-            page.controls.append(ft.Text(value=pm.get_reminder(name)))
+            page.controls.append(ft.Row([ft.Text(value=pm.get_reminder(name))], alignment=ft.MainAxisAlignment.CENTER))
             page.controls.append(ft.Row([ft.Text(value=pm.get_transaction(name), text_align=ft.TextAlign.CENTER)], alignment=ft.MainAxisAlignment.CENTER))
             page.controls.append(ft.Row([ft.TextButton(text='Close the program', on_click=exit_from_app())], alignment=ft.MainAxisAlignment.CENTER))
             page.controls.__getitem__(1).value = '\n'.join(rows)

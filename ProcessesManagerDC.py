@@ -80,6 +80,8 @@ class ProcessesManagerDC(ProcessesManager):
                     message = f'{date_text}\nThe birth day was changed'
                 elif tag == 'CHANGE_CURRENCY':
                     message = f'{date_text}\nThe currency was changed'
+                elif tag == 'SET_REMINDER':
+                    message = f'{date_text}\nThe reminder was settled'
                 elif tag == 'GIVE':
                     amount = transaction.text.split()[1]
                     debt = transaction.text.split()[4]

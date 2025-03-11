@@ -53,6 +53,8 @@ class Process:
 
     def cross(self, text: str, date: float, init: bool):
         other_id = float(text.split()[1])
+        if other_id == self._me:
+            raise ValueError('A process cannot have self-intersections')
         process = Process.get_process(other_id)
         self.add_transaction(Transaction(date, f'CROSS {other_id} and {self._me}', True), init)
         process.add_transaction(Transaction(date, f'INFO CROSS {self._me} and {other_id}', True), init)
@@ -61,10 +63,14 @@ class Process:
             process.related_processes.append(self)
 
     def set_reminder(self, text, date: float, init: bool):
-        reminder_datetime = datetime.strptime(text.split(' ')[1], '%d.%m.%Y-%H:%M:%S')
-        reminder_text = ' '.join(text.split(' ')[2:])
-        if not reminder_datetime or not reminder_text:
-            raise ValueError('Value should be not empty')
+        if text.split(' ')[1] == 'None':
+            reminder_datetime = datetime(9999, 12, 31)
+            reminder_text = 'No have reminder'
+        else:
+            reminder_datetime = datetime.strptime(text.split(' ')[1], '%d.%m.%Y-%H:%M:%S')
+            reminder_text = ' '.join(text.split(' ')[2:])
+            if not reminder_datetime or not reminder_text:
+                raise ValueError('Value should be (date-time + text) or None')
         self.add_transaction(Transaction(date, f'SET_REMINDER {reminder_datetime.strftime("%d.%m.%Y-%H:%M:%S")} {reminder_text}', True), init)
         self._reminder_date_time = reminder_datetime
         self._reminder_text = reminder_text

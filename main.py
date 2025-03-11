@@ -107,7 +107,7 @@ def main(page: ft.Page):
     page.text_field = ft.TextField()
 
     def row(name, main_start, main_finish, text, main_name=None):
-        n = 120
+        n = 110
         ans = ['-' for _ in range(n + 2)]
         one = (main_finish - main_start) / n
         start = pm.main_dict[name].get_identifier()[0]

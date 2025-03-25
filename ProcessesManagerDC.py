@@ -26,15 +26,16 @@ class ProcessesManagerDC(ProcessesManager):
                 self.info_dict[process.get_process_name()].append(process.name
                                                                   + ' balance: ' + str(amount))
             elif isinstance(process, Debt):
-                self.info_dict[process.get_process_name()] = ['Debt of ' + process.related_processes[0].name]
-                self.info_dict[process.get_process_name()].append('Debt of '
+                self.info_dict[process.get_process_name()] = [f'{process.name} of ' + process.related_processes[0].name]
+                self.info_dict[process.get_process_name()].append(f'{process.name} of '
                                                                   + process.related_processes[0].name + ": "
                                                                   + str(process.debt_amount) + ' '
                                                                   + str(process.debt_currency))
             else:
                 self.info_dict[process.get_process_name()] = [process.get_process_name()]
-                self.info_dict[process.get_process_name()].append(process.get_process_name()
-                                                                  + " from " + process.related_processes[0].get_process_name())
+                (self.info_dict[process.get_process_name()].append(process.get_process_name()
+                                                                   + " from "
+                                                                   + process.related_processes[0].get_process_name()))
         self.info_dict[self.first_process_name].append(self.first_process.name
                                                        + ' balance: ' + str(total_amount))
 
@@ -75,21 +76,28 @@ class ProcessesManagerDC(ProcessesManager):
                 elif tag == 'NEW_DEBT':
                     message = f'{date_text}\nNew debt was created'
                 elif tag == 'CHANGE_NAME':
-                    message = f'{date_text}\nThe name was changed from {transaction.text.split()[3]}'
+                    old_name = transaction.text.split()[3]
+                    new_name = transaction.text.split()[1]
+                    message = f'{date_text}\nThe name was changed from {old_name} to {new_name}'
                 elif tag == 'CHANGE_BIRTHDAY':
                     message = f'{date_text}\nThe birth day was changed'
                 elif tag == 'CHANGE_CURRENCY':
-                    message = f'{date_text}\nThe currency was changed'
+                    old_currency = transaction.text.split()[3]
+                    new_currency = transaction.text.split()[1]
+                    message = f'{date_text}\nThe currency was changed from {old_currency} to {new_currency}'
                 elif tag == 'SET_REMINDER':
-                    message = f'{date_text}\nThe reminder was settled'
+                    date_reminder = transaction.text.split()[1]
+                    message = f'{date_text}\nThe reminder was settled on {date_reminder}'
                 elif tag == 'GIVE':
                     amount = transaction.text.split()[1]
-                    debt = transaction.text.split()[4]
-                    message = f'{date_text}\nI gave {amount}. Debt was {debt}'
+                    old_debt = transaction.text.split()[4]
+                    new_debt = transaction.text.split()[8]
+                    message = f'{date_text}\nI gave {amount}. Debt was {old_debt}. Now the debt is {new_debt}'
                 elif tag == 'TAKE':
                     amount = transaction.text.split()[1]
-                    debt = transaction.text.split()[4]
-                    message = f'{date_text}\nI took {amount}. Debt was {debt}'
+                    old_debt = transaction.text.split()[4]
+                    new_debt = transaction.text.split()[8]
+                    message = f'{date_text}\nI took {amount}. Debt was {old_debt}. Now the debt is {new_debt}'
                 else:
                     message = f'{date_text}\nUnknown tag'
                 ans.append(message)

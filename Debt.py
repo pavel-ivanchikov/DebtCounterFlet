@@ -7,6 +7,7 @@ class Debt(Process):
 
     def __init__(self, identifier: tuple[float, float]):
         super().__init__(identifier)
+        self.name = "Debt_" + str(len(Process._all_processes[str(int(self._parent * 10 ** 6))].debts))
         self.currency_list = ['usd', 'ru', 'euro', 'riel']
         self.debt_currency = "usd"
         self.debt_amount = 0
@@ -15,13 +16,11 @@ class Debt(Process):
 
     def change_currency(self, text, date: float, init: bool):
         currency = text.split(' ')[1]
-        if not currency:
-            raise ValueError('Value should be not empty')
         if currency not in Debt._currency_list:
-            raise ValueError('Value should be positive integer number')
+            raise ValueError(f'Currency should be from the list: {Debt._currency_list}')
         elif self.debt_amount != 0:
             raise ValueError('Can not change currency when debt is not zero')
-        self.add_transaction(Transaction(date, f'CHANGE_NAME {currency} from {self.debt_currency}', True), init)
+        self.add_transaction(Transaction(date, f'CHANGE_CURRENCY {currency} from {self.debt_currency}', True), init)
         self.debt_currency = currency
 
     def give(self, text, date: float, init: bool):
@@ -32,7 +31,8 @@ class Debt(Process):
             raise ValueError('Value should be positive integer number')
         if amount < 0:
             raise ValueError('Value should be positive integer number')
-        self.add_transaction(Transaction(date, f'GIVE {amount} from debt {self.debt_amount}', True), init)
+        self.add_transaction(Transaction(
+            date, f'GIVE {amount} debt was {self.debt_amount} now debt is {amount + self.debt_amount}', True), init)
         self.debt_amount += amount
 
     def take(self, text, date: float, init: bool):
@@ -43,7 +43,8 @@ class Debt(Process):
             raise ValueError('Value should be positive integer number')
         if amount < 0:
             raise ValueError('Value should be positive integer number')
-        self.add_transaction(Transaction(date, f'TAKE {amount} from debt {self.debt_amount}', True), init)
+        self.add_transaction(Transaction(
+            date, f'TAKE {amount} debt was {self.debt_amount} now debt is {self.debt_amount - amount}', True), init)
         self.debt_amount -= amount
 
     def get_able_list(self):

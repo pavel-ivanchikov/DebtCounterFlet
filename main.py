@@ -6,7 +6,7 @@ from ProcessesManagerDC import ProcessesManagerDC
 
 
 def main(page: ft.Page):
-    path = r"C:/DebtCounter/fifth/"
+    path = r"C:/DebtCounter/first/"
     if len(os.listdir(path)) == 0:
         _ = MyLife.create_first_process()
     pm = ProcessesManagerDC(path)
@@ -191,14 +191,14 @@ def main(page: ft.Page):
         page.controls.append(
             ft.ElevatedButton(
                 page.date_text,
-                icon=ft.icons.CALENDAR_MONTH,  # Используем ft.Icons вместо ft.icons
+                icon=ft.Icons.CALENDAR_MONTH,  # Используем ft.Icons вместо ft.icons
                 on_click=lambda e: page.open(date_picker),  # Открываем DatePicker через page.open
             )
         )
         page.controls.append(
             ft.ElevatedButton(
                 page.time_text,
-                icon=ft.icons.ACCESS_TIME,  # Используем ft.Icons вместо ft.icons
+                icon=ft.Icons.ACCESS_TIME,  # Используем ft.Icons вместо ft.icons
                 on_click=lambda e: page.open(time_picker),  # Открываем TimePicker через page.open
             )
         )

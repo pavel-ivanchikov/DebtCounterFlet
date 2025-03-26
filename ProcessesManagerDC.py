@@ -121,4 +121,3 @@ class ProcessesManagerDC(ProcessesManager):
 
     def add_new_process(self, process):
         super().add_new_process(process)
-        self.controller()

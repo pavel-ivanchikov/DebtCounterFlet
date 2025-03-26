@@ -38,6 +38,8 @@ class Process:
             else:
                 raise ValueError('Wrong Tag')
         else:
+            if text.strip() == '':
+                raise ValueError('Value should not be empty')
             self.add_transaction(Transaction(date, text, official), init)
 
     def info(self, text: str, date: float, init: bool):
@@ -52,7 +54,12 @@ class Process:
         return process
 
     def cross(self, text: str, date: float, init: bool):
-        other_id = float(text.split()[1])
+        if len(text.split(' ')) < 2:
+            raise ValueError('You should choose another process to intersect')
+        try:
+            other_id = float(text.split(' ')[1])
+        except ValueError:
+            raise ValueError('You should choose the process from the list')
         if other_id == self._me:
             raise ValueError('A process cannot have self-intersections')
         process = Process.get_process(other_id)
@@ -67,10 +74,13 @@ class Process:
             reminder_datetime = datetime(9999, 12, 31)
             reminder_text = 'No have reminder'
         else:
-            reminder_datetime = datetime.strptime(text.split(' ')[1], '%d.%m.%Y-%H:%M:%S')
-            reminder_text = ' '.join(text.split(' ')[2:])
-            if not reminder_datetime or not reminder_text:
+            if len(text.split(' ')) <= 2:
                 raise ValueError('Value should be (date-time + text) or None')
+            try:
+                reminder_datetime = datetime.strptime(text.split(' ')[1], '%d.%m.%Y-%H:%M:%S')
+            except ValueError:
+                raise ValueError('Value should be (%d.%m.%Y-%H:%M:%S + text) ')
+            reminder_text = ' '.join(text.split(' ')[2:])
         self.add_transaction(Transaction(date, f'SET_REMINDER {reminder_datetime.strftime("%d.%m.%Y-%H:%M:%S")} {reminder_text}', True), init)
         self._reminder_date_time = reminder_datetime
         self._reminder_text = reminder_text

@@ -11,9 +11,7 @@ def main(page: ft.Page):
         _ = MyLife.create_first_process()
     pm = ProcessesManagerDC(path)
     pm.deserialization()
-    # main_process_name = pm.first_process_name
     page.process_name = pm.first_process_name
-    # mode = 0
     page.sorting_mode = 0
 
     page.title = "Flet Debt Counter"
@@ -96,14 +94,6 @@ def main(page: ft.Page):
     page.time_text = 'select a time for reminder'
     page.date = None
     page.time = None
-
-    # Создаем выпадающий список и текстовое поле
-    page.dropdown = ft.Dropdown(
-        options=[ft.dropdown.Option(f"{process_id} ({process_info[1]})") for process_id, process_info in
-                 pm.info_dict.items()],
-        label="select process to intersect",
-        on_change=handle_process_choose  # Привязываем обработчик события
-    )
     page.text_field = ft.TextField()
 
     def row(name, main_start, main_finish, text):
@@ -156,6 +146,14 @@ def main(page: ft.Page):
         page.clean()
         pm.positions.clear()
 
+        # Создаем выпадающий список
+        page.dropdown = ft.Dropdown(
+            options=[ft.dropdown.Option(f"{process_id} ({process_info[1]})") for process_id, process_info in
+                     pm.info_dict.items()],
+            label="select process to intersect",
+            on_change=handle_process_choose  # Привязываем обработчик события
+        )
+
         if pm.main_dict[page.process_name].related_processes:
             main_start = min(pm.main_dict[page.process_name].get_first_date(),
                              min(pm.main_dict[page.process_name].related_processes,
@@ -188,17 +186,18 @@ def main(page: ft.Page):
             rows.append(row(process.get_process_name(), main_start, main_finish, text2))
         page.controls.append(ft.Row([ft.Column(items)], alignment=ft.MainAxisAlignment.CENTER))
         page.controls.append(ft.Text(value=pm.previous_action_result))
+        # Добавляю выпадающий календарь и часы для выбора напоминания.
         page.controls.append(
             ft.ElevatedButton(
                 page.date_text,
-                icon=ft.Icons.CALENDAR_MONTH,  # Используем ft.Icons вместо ft.icons
+                icon=ft.icons.CALENDAR_MONTH,  # Используем ft.Icons вместо ft.icons
                 on_click=lambda e: page.open(date_picker),  # Открываем DatePicker через page.open
             )
         )
         page.controls.append(
             ft.ElevatedButton(
                 page.time_text,
-                icon=ft.Icons.ACCESS_TIME,  # Используем ft.Icons вместо ft.icons
+                icon=ft.icons.ACCESS_TIME,  # Используем ft.Icons вместо ft.icons
                 on_click=lambda e: page.open(time_picker),  # Открываем TimePicker через page.open
             )
         )
@@ -214,6 +213,5 @@ def main(page: ft.Page):
         page.update()
 
     new_screen()
-
 
 ft.app(main)

@@ -2,11 +2,12 @@ import os
 import datetime
 import flet as ft
 from MyLife import MyLife
+from Process import Process
 from ProcessesManagerDC import ProcessesManagerDC
 
 
 def main(page: ft.Page):
-    path = r"C:/DebtCounter/first/"
+    path = Process.path
     if len(os.listdir(path)) == 0:
         _ = MyLife.create_first_process()
     pm = ProcessesManagerDC(path)
@@ -28,6 +29,17 @@ def main(page: ft.Page):
             page.time = None
             page.text_field.value = ''
             new_screen()
+        return fun
+
+    def go_home():
+        def fun(e):
+            home_screen()
+        return fun
+
+    def change_sorting_mode_home(mode):
+        def fun(e):
+            page.sorting_mode = mode
+            home_screen()
         return fun
 
     def change_sorting_mode(mode):
@@ -100,7 +112,7 @@ def main(page: ft.Page):
         n = 111
         ans = ['-' for _ in range(n + 2)]
         one = (main_finish - main_start) / n
-        start = pm.main_dict[name].get_identifier()[0]
+        start = pm.main_dict[name].get_first_date()
         if start > main_start:
             for i in range(round((start - main_start) / one)):
                 ans[i] = '_'
@@ -142,6 +154,37 @@ def main(page: ft.Page):
 
         return fun
 
+    def home_screen():
+        page.process_name = pm.first_process_name
+
+        page.clean()
+        pm.positions.clear()
+        main_start = min(Process.all_processes.values(), key=lambda x: x.get_first_date()).get_first_date()
+        main_finish = max(Process.all_processes.values(), key=lambda x: x.get_last_date()).get_last_date()
+        page.controls.append(ft.Row([ft.TextButton(text='begin', on_click=change_sorting_mode_home(0)),
+                                     ft.TextButton(text='last_transaction', on_click=change_sorting_mode_home(1)),
+                                     ft.TextButton(text='reminder', on_click=change_sorting_mode_home(2))],
+                                    alignment=ft.MainAxisAlignment.CENTER))
+        page.controls.append(page.process_tree)
+        rows = []
+        items = []
+        if page.sorting_mode == 0:
+            process_list = sorted(Process.all_processes.values(), key=lambda x: x.get_first_date())
+        elif page.sorting_mode == 1:
+            process_list = sorted(Process.all_processes.values(), key=lambda x: x.get_last_date())
+        else:
+            process_list = sorted(Process.all_processes.values(), key=lambda x: x.get_reminder_date_time())
+        for process in process_list:
+            text1 = pm.info_dict[process.get_process_name()][0]
+            text2 = pm.info_dict[process.get_process_name()][1]
+            items.append(ft.TextButton(text1, on_click=change_process_name(process.get_process_name())))
+            rows.append(row(process.get_process_name(), main_start, main_finish, text2))
+        page.controls.append(ft.Row([ft.Column(items)], alignment=ft.MainAxisAlignment.CENTER))
+        page.controls.append(ft.Row([ft.TextButton(text='Close the program', on_click=exit_from_app())],
+                                    alignment=ft.MainAxisAlignment.CENTER))
+        page.process_tree.value = '\n'.join(rows)
+        page.update()
+
     def new_screen():
         page.clean()
         pm.positions.clear()
@@ -164,6 +207,7 @@ def main(page: ft.Page):
         else:
             main_start = pm.main_dict[page.process_name].get_first_date()
             main_finish = pm.main_dict[page.process_name].get_last_date()
+        page.controls.append(ft.TextButton(text='Home', on_click=go_home()))
         page.controls.append(ft.Row([ft.TextButton(text='begin', on_click=change_sorting_mode(0)),
                                      ft.TextButton(text='last_transaction', on_click=change_sorting_mode(1)),
                                      ft.TextButton(text='reminder', on_click=change_sorting_mode(2))],

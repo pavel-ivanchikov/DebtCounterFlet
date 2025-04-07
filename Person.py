@@ -1,6 +1,6 @@
 from Transaction import Transaction
 from Process import Process
-from Debt import Debt
+from Deal import Deal
 
 
 class Person(Process):
@@ -14,14 +14,14 @@ class Person(Process):
         super().__init__(identifier)
         self.name = "Person_" + str(self.__class__._counter)
         self.debts = []
-        self.additional_ables = {'NEW_DEBT': self.new_debt, 'CHANGE_NAME': self.change_name, 'CHANGE_BIRTHDAY': self.change_birthday}
+        self.additional_ables = {'NEW_DEAL': self.new_deal, 'CHANGE_NAME': self.change_name, 'CHANGE_BIRTHDAY': self.change_birthday}
         self._able.update(self.additional_ables)
         self.birthday = None
 
-    def new_debt(self, _, date: float, init: bool):
-        process = Debt((date, self._me))
-        self.add_transaction(Transaction(date, f'NEW_DEBT {date} from {self._me}', True), init)
-        process.add_transaction(Transaction(date, f'INFO New debt: {date} from {self._me}', True), init)
+    def new_deal(self, _, date: float, init: bool):
+        process = Deal((date, self._me))
+        self.add_transaction(Transaction(date, f'NEW_DEAL {date} from {self._me}', True), init)
+        process.add_transaction(Transaction(date, f'INFO New deal: {date} from {self._me}', True), init)
         self.related_processes.append(process)
         process.related_processes.append(self)
         self.debts.append(process)

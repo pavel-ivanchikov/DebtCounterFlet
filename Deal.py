@@ -2,12 +2,12 @@ from Transaction import Transaction
 from Process import Process
 
 
-class Debt(Process):
+class Deal(Process):
     _currency_list = ['usd', 'ru', 'euro', 'riel']
 
     def __init__(self, identifier: tuple[float, float]):
         super().__init__(identifier)
-        self.name = "Debt_" + str(len(Process._all_processes[str(int(self._parent * 10 ** 6))].debts))
+        self.name = "Deal_" + str(len(Process.all_processes[str(int(self._parent * 10 ** 6))].debts))
         self.currency_list = ['usd', 'ru', 'euro', 'riel']
         self.debt_currency = "usd"
         self.debt_amount = 0
@@ -16,8 +16,8 @@ class Debt(Process):
 
     def change_currency(self, text, date: float, init: bool):
         currency = text.split(' ')[1]
-        if currency not in Debt._currency_list:
-            raise ValueError(f'Currency should be from the list: {Debt._currency_list}')
+        if currency not in Deal._currency_list:
+            raise ValueError(f'Currency should be from the list: {Deal._currency_list}')
         elif self.debt_amount != 0:
             raise ValueError('Can not change currency when debt is not zero')
         self.add_transaction(Transaction(date, f'CHANGE_CURRENCY {currency} from {self.debt_currency}', True), init)

@@ -3,8 +3,8 @@ from Transaction import Transaction
 
 
 class Process:
-    _all_processes = {}
-    _path = r"C:/DebtCounter/first/"
+    all_processes = {}
+    path = r"C:/DebtCounter/first/"
 
     def __init__(self, identifier: tuple[float, float]):
         self.__data = []
@@ -14,12 +14,12 @@ class Process:
         self._reminder_date_time = datetime(9999, 12, 31)
         self._reminder_text = 'No have reminder'
         self.related_processes = []
-        Process._all_processes[self.get_process_name()] = self
+        Process.all_processes[self.get_process_name()] = self
 
     def add_transaction(self, transaction: Transaction, init: bool):
         if not init:
             # Тут происходит сериализация
-            name = Process._path + str(int(self._me * 10 ** 6)) + '.txt'
+            name = Process.path + str(int(self._me * 10 ** 6)) + '.txt'
             with open(name, 'a', encoding='UTF-8') as file:
                 file.write(str(transaction.date) + (' +' if transaction.official else '') + '\n')
                 file.write(transaction.text + '\n')
@@ -87,8 +87,8 @@ class Process:
 
     @staticmethod
     def get_process(identifier: float):
-        if str(int(identifier * 10 ** 6)) in Process._all_processes:
-            return Process._all_processes[str(int(identifier * 10 ** 6))]
+        if str(int(identifier * 10 ** 6)) in Process.all_processes:
+            return Process.all_processes[str(int(identifier * 10 ** 6))]
         else:
             raise ValueError('No process with such ID')
 

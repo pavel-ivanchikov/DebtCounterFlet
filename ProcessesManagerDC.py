@@ -2,13 +2,13 @@ import datetime
 from ProcessesManager import ProcessesManager
 from MyLife import MyLife
 from Person import Person
-from Debt import Debt
+from Deal import Deal
 
 
 class ProcessesManagerDC(ProcessesManager):
     def __init__(self, path: str):
         super().__init__(path)
-        self.new_process_tags = ('SPLIT', 'NEW_PERSON', 'NEW_DEBT')
+        self.new_process_tags = ('SPLIT', 'NEW_PERSON', 'NEW_DEAL')
         self.info_dict = {}
         self.previous_action_result = 'Wellcome!'
         self.positions = []
@@ -25,7 +25,7 @@ class ProcessesManagerDC(ProcessesManager):
                 total_amount += amount
                 self.info_dict[process.get_process_name()].append(process.name
                                                                   + ' balance: ' + str(amount))
-            elif isinstance(process, Debt):
+            elif isinstance(process, Deal):
                 self.info_dict[process.get_process_name()] = [f'{process.name} of ' + process.related_processes[0].name]
                 self.info_dict[process.get_process_name()].append(f'{process.name} of '
                                                                   + process.related_processes[0].name + ": "
@@ -73,8 +73,8 @@ class ProcessesManagerDC(ProcessesManager):
                     name_float = float(transaction.text.split()[1])
                     name = str(int(name_float * 10 ** 6))
                     message = f'{date_text}\nNew person, {self.info_dict[name][0]}, was created'
-                elif tag == 'NEW_DEBT':
-                    message = f'{date_text}\nNew debt was created'
+                elif tag == 'NEW_DEAL':
+                    message = f'{date_text}\nNew deal was created'
                 elif tag == 'CHANGE_NAME':
                     old_name = transaction.text.split()[3]
                     new_name = transaction.text.split()[1]

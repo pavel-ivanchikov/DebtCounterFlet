@@ -171,7 +171,7 @@ def main(page: ft.Page):
         if page.sorting_mode == 0:
             process_list = sorted(Process.all_processes.values(), key=lambda x: x.get_first_date())
         elif page.sorting_mode == 1:
-            process_list = sorted(Process.all_processes.values(), key=lambda x: x.get_last_date())
+            process_list = sorted(Process.all_processes.values(), key=lambda x: -x.get_last_date())
         else:
             process_list = sorted(Process.all_processes.values(), key=lambda x: x.get_reminder_date_time())
         for process in process_list:
@@ -256,6 +256,6 @@ def main(page: ft.Page):
         page.process_tree.value = '\n'.join(rows)
         page.update()
 
-    new_screen()
+    home_screen()
 
 ft.app(main)

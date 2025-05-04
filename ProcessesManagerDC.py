@@ -21,7 +21,7 @@ class ProcessesManagerDC(ProcessesManager):
                 self.info_dict[process.get_process_name()] = [process.name]
             elif isinstance(process, Person):
                 self.info_dict[process.get_process_name()] = [process.name]
-                amount = sum(map(lambda x: x.debt_amount, process.debts))
+                amount = sum(map(lambda x: x.deal_amount, process.debts))
                 total_amount += amount
                 self.info_dict[process.get_process_name()].append(process.name
                                                                   + ' balance: ' + str(amount))
@@ -29,8 +29,8 @@ class ProcessesManagerDC(ProcessesManager):
                 self.info_dict[process.get_process_name()] = [f'{process.name} of ' + process.related_processes[0].name]
                 self.info_dict[process.get_process_name()].append(f'{process.name} of '
                                                                   + process.related_processes[0].name + ": "
-                                                                  + str(process.debt_amount) + ' '
-                                                                  + str(process.debt_currency))
+                                                                  + str(process.deal_amount) + ' '
+                                                                  + str(process.deal_currency))
             else:
                 self.info_dict[process.get_process_name()] = [process.get_process_name()]
                 (self.info_dict[process.get_process_name()].append(process.get_process_name()
@@ -92,12 +92,12 @@ class ProcessesManagerDC(ProcessesManager):
                     amount = transaction.text.split()[1]
                     old_debt = transaction.text.split()[4]
                     new_debt = transaction.text.split()[8]
-                    message = f'{date_text}\nI gave {amount}. Debt was {old_debt}. Now the debt is {new_debt}'
+                    message = f'{date_text}\nI gave {amount}. Balance was {old_debt}. Now the balance is {new_debt}'
                 elif tag == 'TAKE':
                     amount = transaction.text.split()[1]
                     old_debt = transaction.text.split()[4]
                     new_debt = transaction.text.split()[8]
-                    message = f'{date_text}\nI took {amount}. Debt was {old_debt}. Now the debt is {new_debt}'
+                    message = f'{date_text}\nI took {amount}. Balance was {old_debt}. Now the balance is {new_debt}'
                 else:
                     message = f'{date_text}\nUnknown tag'
                 ans.append(message)

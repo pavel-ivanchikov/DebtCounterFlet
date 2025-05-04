@@ -4,6 +4,7 @@ import flet as ft
 from MyLife import MyLife
 from Process import Process
 from ProcessesManagerDC import ProcessesManagerDC
+import pseudographics as pg
 
 
 def main(page: ft.Page):
@@ -108,28 +109,6 @@ def main(page: ft.Page):
     page.time = None
     page.text_field = ft.TextField()
 
-    def row(name, main_start, main_finish, text):
-        n = 111
-        ans = ['-' for _ in range(n + 2)]
-        one = (main_finish - main_start) / n
-        start = pm.main_dict[name].get_first_date()
-        if start > main_start:
-            for i in range(round((start - main_start) / one)):
-                ans[i] = '_'
-        for action in pm.main_dict[name].get_data():
-            if action.text.split(' ')[0] in ('INFO', 'CROSS', 'NEW_DEBT', 'NEW_PERSON'):
-                time_crossing = action.date
-                if one == 0:
-                    one = 1
-                position = round((time_crossing - main_start) / one)
-                if name == page.process_name:
-                    pm.positions.append(position)
-                    ans[position] = 'x'
-                else:
-                    if position in pm.positions:
-                        ans[position] = 'x'
-        return text + '\n' + ''.join(ans) + '>'
-
     def exit_from_app():
         def fun(e):
             page.window.destroy()
@@ -178,7 +157,7 @@ def main(page: ft.Page):
             text1 = pm.info_dict[process.get_process_name()][0]
             text2 = pm.info_dict[process.get_process_name()][1]
             items.append(ft.TextButton(text1, on_click=change_process_name(process.get_process_name())))
-            rows.append(row(process.get_process_name(), main_start, main_finish, text2))
+            rows.append(pg.row_home(process.get_process_name(), main_start, main_finish, text2, pm))
         page.controls.append(ft.Row([ft.Column(items)], alignment=ft.MainAxisAlignment.CENTER))
         page.controls.append(ft.Row([ft.TextButton(text='Close the program', on_click=exit_from_app())],
                                     alignment=ft.MainAxisAlignment.CENTER))
@@ -213,7 +192,7 @@ def main(page: ft.Page):
                                      ft.TextButton(text='reminder', on_click=change_sorting_mode(2))],
                                     alignment=ft.MainAxisAlignment.CENTER))
         page.controls.append(page.process_tree)
-        rows = [row(page.process_name, main_start, main_finish, pm.info_dict[page.process_name][1])]
+        rows = [pg.row(page.process_name, main_start, main_finish, pm.info_dict[page.process_name][1], page.process_name, pm)]
         items = []
         if page.sorting_mode == 0:
             process_list = reversed(pm.main_dict[page.process_name].related_processes)
@@ -227,7 +206,7 @@ def main(page: ft.Page):
             text1 = pm.info_dict[process.get_process_name()][0]
             text2 = pm.info_dict[process.get_process_name()][1]
             items.append(ft.TextButton(text1, on_click=change_process_name(process.get_process_name())))
-            rows.append(row(process.get_process_name(), main_start, main_finish, text2))
+            rows.append(pg.row(process.get_process_name(), main_start, main_finish, text2, page.process_name, pm))
         page.controls.append(ft.Row([ft.Column(items)], alignment=ft.MainAxisAlignment.CENTER))
         page.controls.append(ft.Text(value=pm.previous_action_result))
         # Добавляю выпадающий календарь и часы для выбора напоминания.

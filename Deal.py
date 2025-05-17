@@ -3,7 +3,7 @@ from Process import Process
 
 
 class Deal(Process):
-    _currency_list = ['usd', 'ru', 'euro', 'riel', 'minutes']
+    _currency_list = ['usd', 'ru', 'euro', 'k_riel', 'minutes']
 
     def __init__(self, identifier: tuple[float, float]):
         super().__init__(identifier)

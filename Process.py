@@ -4,7 +4,7 @@ from Transaction import Transaction
 
 class Process:
     all_processes = {}
-    path = r"C:/DebtCounter/second/"
+    path = r"C:/DebtCounter/first/"
 
     def __init__(self, identifier: tuple[float, float]):
         self.__data = []

@@ -17,9 +17,8 @@ def main(page: ft.Page):
     page.sorting_mode = 0
 
     page.title = "Flet Debt Counter"
-    page.window.width = 777
+    page.window.width = 800
     page.scroll = True
-    page.process_tree = ft.Text()
 
     def change_process_name(name):
         def fun(e):
@@ -144,8 +143,6 @@ def main(page: ft.Page):
                                      ft.TextButton(text='last_transaction', on_click=change_sorting_mode_home(1)),
                                      ft.TextButton(text='reminder', on_click=change_sorting_mode_home(2))],
                                     alignment=ft.MainAxisAlignment.CENTER))
-        # page.controls.append(page.process_tree)
-        # rows = []
         items = []
         if page.sorting_mode == 0:
             process_list = sorted(Process.all_processes.values(), key=lambda x: x.get_first_date())
@@ -161,7 +158,6 @@ def main(page: ft.Page):
         page.controls.append(ft.Row([ft.Column(items)], alignment=ft.MainAxisAlignment.CENTER))
         page.controls.append(ft.Row([ft.TextButton(text='Close the program', on_click=exit_from_app())],
                                     alignment=ft.MainAxisAlignment.CENTER))
-        # page.process_tree.value = '\n'.join(rows)
         page.update()
 
     def new_screen():
@@ -191,10 +187,9 @@ def main(page: ft.Page):
                                      ft.TextButton(text='last_transaction', on_click=change_sorting_mode(1)),
                                      ft.TextButton(text='reminder', on_click=change_sorting_mode(2))],
                                     alignment=ft.MainAxisAlignment.CENTER))
-        # ft.Text = pg.row(page.process_name, main_start, main_finish, pm.info_dict[page.process_name][1], page.process_name, pm)
-        # page.controls.append(ft.TextButton(pg.row(page.process_name, main_start, main_finish, pm.info_dict[page.process_name][1], page.process_name, pm)))
-        items = []
-        items.append(ft.TextButton(pg.row(page.process_name, main_start, main_finish, pm.info_dict[page.process_name][1], page.process_name, pm)))
+        items = [ft.TextButton(
+            pg.row(page.process_name, main_start, main_finish, pm.info_dict[page.process_name][1], page.process_name,
+                   pm))]
         if page.sorting_mode == 0:
             process_list = reversed(pm.main_dict[page.process_name].related_processes)
         elif page.sorting_mode == 1:
@@ -208,7 +203,6 @@ def main(page: ft.Page):
             text2 = pm.info_dict[process.get_process_name()][1]
             text3 = pg.row(process.get_process_name(), main_start, main_finish, text2, page.process_name, pm)
             items.append(ft.TextButton(text3, on_click=change_process_name(process.get_process_name())))
-            # rows.append(text3)
         page.controls.append(ft.Row([ft.Column(items)], alignment=ft.MainAxisAlignment.CENTER))
         page.controls.append(ft.Text(value=pm.previous_action_result))
         # Добавляю выпадающий календарь и часы для выбора напоминания.
@@ -234,7 +228,6 @@ def main(page: ft.Page):
         page.controls.append(ft.Row([ft.Text(value=pm.get_reminder(page.process_name))], alignment=ft.MainAxisAlignment.CENTER))
         page.controls.append(ft.Row([ft.Text(value=pm.get_transaction(page.process_name), text_align=ft.TextAlign.CENTER)], alignment=ft.MainAxisAlignment.CENTER))
         page.controls.append(ft.Row([ft.TextButton(text='Close the program', on_click=exit_from_app())], alignment=ft.MainAxisAlignment.CENTER))
-        # page.process_tree.value = '\n'.join(rows)
         page.update()
 
     home_screen()

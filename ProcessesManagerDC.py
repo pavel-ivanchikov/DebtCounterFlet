@@ -16,15 +16,33 @@ class ProcessesManagerDC(ProcessesManager):
 
     def controller(self):
         total_amount = 0
+        total_amount2 = {}
         for process in self.main_dict.values():
             if isinstance(process, MyLife):
                 self.info_dict[process.get_process_name()] = [process.name]
             elif isinstance(process, Person):
                 self.info_dict[process.get_process_name()] = [process.name]
-                amount = sum(map(lambda x: x.deal_amount, process.debts))
-                total_amount += amount
+                person_total_amount = {}
+                for deal in process.deals:
+                    if deal.deal_currency in person_total_amount:
+                        person_total_amount[deal.deal_currency] += deal.deal_amount
+                    else:
+                        person_total_amount[deal.deal_currency] = deal.deal_amount
+                    if deal.deal_currency in total_amount2:
+                        total_amount2[deal.deal_currency] += deal.deal_amount
+                    else:
+                        total_amount2[deal.deal_currency] = deal.deal_amount
+
+                # amount = sum(map(lambda x: x.deal_amount, process.deals))
+                # total_amount += amount
+                # self.info_dict[process.get_process_name()].append(process.name
+                #                                                   + ' balance: ' + str(amount))
+                ans = []
+                for key, value in person_total_amount.items():
+                    if value != 0:
+                        ans.append(str(value) + ' ' + str(key))
                 self.info_dict[process.get_process_name()].append(process.name
-                                                                  + ' balance: ' + str(amount))
+                                                                  + ' balance: ' + ', '.join(ans))
             elif isinstance(process, Deal):
                 self.info_dict[process.get_process_name()] = [f'{process.name} of ' + process.related_processes[0].name]
                 self.info_dict[process.get_process_name()].append(f'{process.name} of '
@@ -36,8 +54,12 @@ class ProcessesManagerDC(ProcessesManager):
                 (self.info_dict[process.get_process_name()].append(process.get_process_name()
                                                                    + " from "
                                                                    + process.related_processes[0].get_process_name()))
+        ans = []
+        for key, value in total_amount2.items():
+            if value != 0:
+                ans.append(str(value) + ' ' + str(key))
         self.info_dict[self.first_process_name].append(self.first_process.name
-                                                       + ' balance: ' + str(total_amount))
+                                                       + ' balance: ' + ', '.join(ans))
 
     def get_transaction(self, name, n=None):
         process = self.main_dict[name]

@@ -15,7 +15,9 @@ class MyLife(Process):
     def __init__(self, identifier: tuple[float, float]):
         super().__init__(identifier)
         self.persons = []
-        self.additional_ables = {'NEW_PERSON': self.new_person, 'CHANGE_NAME': self.change_name, 'CHANGE_BIRTHDAY': self.change_birthday}
+        self.additional_ables = {'NEW_PERSON': self.new_person,
+                                 'CHANGE_NAME': self.change_name,
+                                 'CHANGE_BIRTHDAY': self.change_birthday}
         self._able.update(self.additional_ables)
         self.name = 'Main Process'
         self.birthday = None

@@ -7,11 +7,14 @@ class Deal(Process):
 
     def __init__(self, identifier: tuple[float, float]):
         super().__init__(identifier)
-        self.name = "Deal_" + str(len(Process.all_processes[str(int(self._parent * 10 ** 6))].debts))
+        self.name = "Deal_" + str(len(Process.all_processes[str(int(self._parent * 10 ** 6))].deals))
         self.currency_list = Deal._currency_list
         self.deal_currency = "usd"
         self.deal_amount = 0
-        self.additional_ables = {'CHANGE_CURRENCY': self.change_currency, 'GIVE': self.give, 'TAKE': self.take}
+        self.additional_ables = {'CHANGE_CURRENCY': self.change_currency,
+                                 'CHANGE_NAME': self.change_name,
+                                 'GIVE': self.give,
+                                 'TAKE': self.take}
         self._able.update(self.additional_ables)
 
     def change_currency(self, text, date: float, init: bool):
@@ -22,6 +25,13 @@ class Deal(Process):
             raise ValueError('Can not change currency when debt is not zero')
         self.add_transaction(Transaction(date, f'CHANGE_CURRENCY {currency} from {self.deal_currency}', True), init)
         self.deal_currency = currency
+
+    def change_name(self, text, date: float, init: bool):
+        new_name = text.split(' ')[1]
+        if not new_name:
+            raise ValueError('Value should be not empty')
+        self.add_transaction(Transaction(date, f'CHANGE_NAME {new_name} from {self.name}', True), init)
+        self.name = new_name
 
     def give(self, text, date: float, init: bool):
         amount = text.split(' ')[1]

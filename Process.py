@@ -107,8 +107,13 @@ class Process:
     def get_last_date(self):
         return self.__data[-1].date
 
+    def get_last_date_date(self):
+        return datetime.fromtimestamp(self.__data[-1].date)
+
     def get_first_date(self):
         return self.__data[0].date
+    def get_first_date_date(self):
+        return datetime.fromtimestamp(self.__data[0].date)
 
     def get_data(self):
         return self.__data[:]

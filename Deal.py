@@ -20,7 +20,7 @@ class Deal(Process):
     def change_currency(self, text, date: float, init: bool):
         currency = text.split(' ')[1]
         if currency not in Deal._currency_list:
-            raise ValueError(f'Currency should be from the list: {Deal._currency_list}')
+            raise ValueError(f'Currency should be from the list: {", ".join(Deal._currency_list)}')
         elif self.deal_amount != 0:
             raise ValueError('Can not change currency when debt is not zero')
         self.add_transaction(Transaction(date, f'CHANGE_CURRENCY {currency} from {self.deal_currency}', True), init)

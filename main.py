@@ -23,8 +23,8 @@ def main(page: ft.Page):
     def change_process_name(name):
         def fun(e):
             page.process_name = name
-            page.date_text = 'select a date for reminder'
-            page.time_text = 'select a time for reminder'
+            page.date_text = 'select a date'
+            page.time_text = 'select a time'
             page.date = None
             page.time = None
             page.text_field.value = ''
@@ -102,8 +102,8 @@ def main(page: ft.Page):
                             on_change=handle_change_time(),
                             on_dismiss=handle_dismissal)
     page.overlay.extend([date_picker, time_picker])  # Добавляем оба пикера в overlay
-    page.date_text = 'select a date for reminder'
-    page.time_text = 'select a time for reminder'
+    page.date_text = 'select a date'
+    page.time_text = 'select a time'
     page.date = None
     page.time = None
     page.text_field = ft.TextField()
@@ -116,19 +116,19 @@ def main(page: ft.Page):
     def transaction(name, official, btn_name):
         def fun(e):
             input_text = page.text_field.value
-            if input_text or official:
-                if not input_text:
-                    input_text = ''
-                try:
-                    rez = pm.main_dict[name].act((btn_name + ' ') * int(official) + input_text, official=official)
-                    if rez:
-                        pm.add_new_process(rez)
-                    pm.controller()
-                    pm.previous_action_result = 'Success!'
-                    new_screen()
-                except Exception as e:
-                    pm.previous_action_result = str(e)
-                    new_screen()
+            # if input_text or official:
+            if not input_text:
+                input_text = ''
+            try:
+                rez = pm.main_dict[name].act((btn_name + ' ') * int(official) + input_text, official=official)
+                if rez:
+                    pm.add_new_process(rez)
+                pm.controller()
+                pm.previous_action_result = 'Success!'
+                new_screen()
+            except Exception as e:
+                pm.previous_action_result = str(e)
+                new_screen()
 
         return fun
 
@@ -145,17 +145,21 @@ def main(page: ft.Page):
                                     alignment=ft.MainAxisAlignment.CENTER))
         items = []
         if page.sorting_mode == 0:
-            process_list = sorted(Process.all_processes.values(), key=lambda x: x.get_first_date())
+            process_list = sorted(Process.all_processes.values(), key=lambda x: -x.get_first_date())
         elif page.sorting_mode == 1:
             process_list = sorted(Process.all_processes.values(), key=lambda x: -x.get_last_date())
         else:
             process_list = sorted(Process.all_processes.values(), key=lambda x: x.get_reminder_date_time())
         for process in process_list:
-            text1 = pm.info_dict[process.get_process_name()][0]
+            text1 = process.get_first_date_date().strftime("%d.%m.%Y-%H:%M:%S") * (page.sorting_mode == 0) \
+                    + process.get_last_date_date().strftime("%d.%m.%Y-%H:%M:%S") * (page.sorting_mode == 1) \
+                    + process.get_reminder_date_time().strftime("%d.%m.%Y-%H:%M:%S") * (page.sorting_mode == 2)
             text2 = pm.info_dict[process.get_process_name()][1]
-            text3 = pg.row_home(process.get_process_name(), main_start, main_finish, text2, pm)
+            text3 = pg.row_home(process.get_process_name(), main_start, main_finish
+                                , text2 + ' ' * (80 - len(text2)) + text1, pm)
             items.append(ft.TextButton(text3, on_click=change_process_name(process.get_process_name())))
-        page.controls.append(ft.Row([ft.Column(items)], alignment=ft.MainAxisAlignment.CENTER))
+        # page.controls.append(ft.Row([ft.Column(items)], alignment=ft.MainAxisAlignment.CENTER))
+        page.controls.append(ft.Column(items))
         page.controls.append(ft.Row([ft.TextButton(text='Close the program', on_click=exit_from_app())],
                                     alignment=ft.MainAxisAlignment.CENTER))
         page.update()
@@ -168,7 +172,7 @@ def main(page: ft.Page):
         page.dropdown = ft.Dropdown(
             options=[ft.dropdown.Option(f"{process_id} ({process_info[1]})") for process_id, process_info in
                      pm.info_dict.items()],
-            label="select process to intersect",
+            label="select process",
             on_change=handle_process_choose  # Привязываем обработчик события
         )
 
@@ -199,29 +203,34 @@ def main(page: ft.Page):
             process_list = sorted(pm.main_dict[page.process_name].related_processes,
                                   key=lambda p: p.get_reminder_date_time())
         for process in process_list:
-            text1 = pm.info_dict[process.get_process_name()][0]
+            text1 = process.get_first_date_date().strftime("%d.%m.%Y-%H:%M:%S") * (page.sorting_mode == 0) \
+                    + process.get_last_date_date().strftime("%d.%m.%Y-%H:%M:%S") * (page.sorting_mode == 1) \
+                    + process.get_reminder_date_time().strftime("%d.%m.%Y-%H:%M:%S") * (page.sorting_mode == 2)
             text2 = pm.info_dict[process.get_process_name()][1]
-            text3 = pg.row(process.get_process_name(), main_start, main_finish, text2, page.process_name, pm)
+            # text3 = pg.row(process.get_process_name(), main_start, main_finish, text2, page.process_name, pm)
+            text3 = pg.row(process.get_process_name(), main_start, main_finish, text2 + ' ' * (80 - len(text2)) + text1, page.process_name, pm)
             items.append(ft.TextButton(text3, on_click=change_process_name(process.get_process_name())))
-        page.controls.append(ft.Row([ft.Column(items)], alignment=ft.MainAxisAlignment.CENTER))
+        # page.controls.append(ft.Row([ft.Column(items)], alignment=ft.MainAxisAlignment.CENTER))
+        page.controls.append(ft.Column(items))
         page.controls.append(ft.Text(value=pm.previous_action_result))
         # Добавляю выпадающий календарь и часы для выбора напоминания.
         page.controls.append(
-            ft.ElevatedButton(
-                page.date_text,
-                icon=ft.icons.CALENDAR_MONTH,  # Используем ft.Icons вместо ft.icons
-                on_click=lambda e: page.open(date_picker),  # Открываем DatePicker через page.open
-            )
-        )
-        page.controls.append(
-            ft.ElevatedButton(
-                page.time_text,
-                icon=ft.icons.ACCESS_TIME,  # Используем ft.Icons вместо ft.icons
-                on_click=lambda e: page.open(time_picker),  # Открываем TimePicker через page.open
-            )
-        )
+            ft.Row(
+                [ft.ElevatedButton(
+                    page.date_text,
+                    icon=ft.icons.CALENDAR_MONTH,  # Используем ft.Icons вместо ft.icons
+                    on_click=lambda e: page.open(date_picker),  # Открываем DatePicker через page.open
+                ),
+                ft.ElevatedButton(
+                    page.time_text,
+                    icon=ft.icons.ACCESS_TIME,  # Используем ft.Icons вместо ft.icons
+                    on_click=lambda e: page.open(time_picker),  # Открываем TimePicker через page.open
+                ),
+                page.dropdown], alignment=ft.MainAxisAlignment.CENTER
+
+            ))
         # Добавляем выпадающий список и текстовое поле на страницу
-        page.controls.append(page.dropdown)
+        # page.controls.append(page.dropdown)
         page.controls.append(page.text_field)
         page.controls.append(ft.Row([ft.TextButton(text='Add Message', on_click=transaction(page.process_name, False, ''))] +
                                     [ft.TextButton(text=i, on_click=transaction(page.process_name, True, i)) for i in pm.main_dict[page.process_name].get_able_list()], alignment=ft.MainAxisAlignment.CENTER))

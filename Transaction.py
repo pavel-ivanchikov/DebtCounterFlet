@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 
 class Transaction:
@@ -9,5 +9,5 @@ class Transaction:
         self.official = official
 
     def __repr__(self):
-        date = datetime.datetime.fromtimestamp(self.date)
+        date = datetime.fromtimestamp(self.date)
         return f'{date.strftime("%Y-%m-%d %H:%M:%S")}{" +" if self.official else ""}\n{self.text}'
